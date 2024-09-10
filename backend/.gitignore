@@ -3,3 +3,5 @@
 /.vscode
 /src/assets/attachments
 .env
+web.config
+/src/iisnode
