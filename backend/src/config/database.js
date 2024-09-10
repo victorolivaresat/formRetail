@@ -9,9 +9,9 @@ Sequelize.DATE.prototype._stringify = function _stringify(date, options) {
   return date.format('YYYY-MM-DD HH:mm:ss.SSS');
 };
 
-const sequelize = new Sequelize( process.env.MSSQL_DB_DATABASE, process.env.MSSQL_DB_USER, process.env.MSSQL_DB_PASSWORD,
+const sequelize = new Sequelize( "formularioPromociones","totalsecureApp", "WJZ66$V@eNqCKRGuG*ZY",
   {
-    host: process.env.MSSQL_DB_SERVER,
+    host: "192.168.21.35",
     dialect: 'mssql',
     port: 1433,
     dialectOptions: {

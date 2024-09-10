@@ -5,7 +5,7 @@ const createToken = (payload) => {
   return new Promise((resolve, reject) => {
     jwt.sign(
       payload,
-      process.env.JWT_SECRET,
+      "secret",
       {
         expiresIn: "1d",
       },

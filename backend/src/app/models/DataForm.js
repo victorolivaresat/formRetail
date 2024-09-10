@@ -2,8 +2,10 @@
 const { Sequelize, Model, DataTypes } = require('sequelize');
 const sequelize = require('../../config/database');
 
+// Definir el modelo
 class DataForm extends Model {}
 
+// Inicializar el modelo
 DataForm.init(
   {
     dataId: {
@@ -30,10 +32,18 @@ DataForm.init(
     storeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'stores',
+        key: 'storeId',
+      },
     },
     promotionId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'promotions',
+        key: 'promotionId',
+      },
     },
     ticketNumber: {
       type: DataTypes.STRING(50),
@@ -50,6 +60,10 @@ DataForm.init(
     documentTypeId: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: 'document_types',
+        key: 'documentTypeId',
+      },
     },
     createdAt: {
       type: DataTypes.DATE,
@@ -71,7 +85,6 @@ DataForm.init(
     modelName: 'DataForm',
     tableName: 'data_forms',
     timestamps: true,
-   
   }
 );
 
