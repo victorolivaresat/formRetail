@@ -18,7 +18,7 @@ const createDataForm = async (req, res) => {
 
     if (existingDataForm) {
       return res.status(400).json({ 
-        error: "The client already has this promotion registered." 
+        error: "El cliente ya tiene esta promoción registrada." 
       });
     }
 

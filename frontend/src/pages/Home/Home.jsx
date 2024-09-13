@@ -285,7 +285,7 @@ const Home = () => {
       setDocumentTypeId(null);
     } catch (error) {
       console.error("Error creating DataForm:", error);
-      toast.error("Hubo un error al enviar el formulario.");
+      toast.error("Hubo un error al enviar el formulario: " + error.response.data.error);
     }
   };
 
