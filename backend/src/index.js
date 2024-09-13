@@ -10,7 +10,7 @@ const config = require("../src/config");
 const app = express();
 
 // Puerto de la aplicación
-const port = process.env.PORT || 7000;
+const port = process.env.PORT || 5000;
 
 // Middlewares
 app.use(morgan("dev"));

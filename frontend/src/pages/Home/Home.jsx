@@ -13,19 +13,36 @@ import {
 
 const Home = () => {
   const { currentUser, isAuthenticated, logoutUser } = useAuth();
-
+  const [prevNumberDocumentLength, setPrevNumberDocumentLength] = useState(0);
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
+  
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
   const [ticketNumber, setTicketNumber] = useState("");
   const [exchangeDate, setExchangeDate] = useState("");
   const [promotionId, setPromotionId] = useState("");
-  const [showModal, setShowModal] = useState(false); 
+  const [showModal, setShowModal] = useState(false);
   const [promotions, setPromotions] = useState([]);
   const [clientName, setClientName] = useState("");
   const [storeId, setStoreId] = useState(null);
   const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
+
+  const [isClientNameEditable, setIsClientNameEditable] = useState(false);
+
+  // Función que controla el comportamiento cuando el número de documento cambia
+
+
+
+  useEffect(() => {
+    // Solo borrar el nombre si el número de documento es más corto que el anterior
+    if (numberDocumentClient.length < prevNumberDocumentLength) {
+      setClientName("");
+    }
+    // Actualizar la longitud previa del número de documento
+    setPrevNumberDocumentLength(numberDocumentClient.length);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [numberDocumentClient]);
 
   // Get all stores
   useEffect(() => {
@@ -87,22 +104,53 @@ const Home = () => {
   // Validaciones de formulario
   const validateForm = () => {
     const requiredFields = [
-      { field: clientName, name: "clientName", message: "El nombre del cliente es obligatorio." },
-      { field: numberDocumentClient, name: "numberDocumentClient", message: "El número de documento es obligatorio." },
-      { field: ticketNumber, name: "ticketNumber", message: "El número de ticket es obligatorio." },
-      { field: exchangeDate, name: "exchangeDate", message: "La fecha es obligatoria." },
-      { field: storeId, name: "store", message: "Debe seleccionar una tienda." },
-      { field: promotionId, name: "promotionId", message: "Debe seleccionar una promoción." },
-      { field: documentTypeId, name: "documentTypeId", message: "Debe seleccionar un tipo de documento." },
+      {
+        field: clientName,
+        name: "clientName",
+        message: "El nombre del cliente es obligatorio.",
+      },
+      {
+        field: numberDocumentClient,
+        name: "numberDocumentClient",
+        message: "El número de documento es obligatorio.",
+      },
+      {
+        field: ticketNumber,
+        name: "ticketNumber",
+        message: "El número de ticket es obligatorio.",
+      },
+      {
+        field: exchangeDate,
+        name: "exchangeDate",
+        message: "La fecha es obligatoria.",
+      },
+      {
+        field: storeId,
+        name: "store",
+        message: "Debe seleccionar una tienda.",
+      },
+      {
+        field: promotionId,
+        name: "promotionId",
+        message: "Debe seleccionar una promoción.",
+      },
+      {
+        field: documentTypeId,
+        name: "documentTypeId",
+        message: "Debe seleccionar un tipo de documento.",
+      },
     ];
-  
-    const formErrors = requiredFields.reduce((errors, { field, name, message }) => {
-      if (!field) errors[name] = message;
-      return errors;
-    }, {});
-  
+
+    const formErrors = requiredFields.reduce(
+      (errors, { field, name, message }) => {
+        if (!field) errors[name] = message;
+        return errors;
+      },
+      {}
+    );
+
     setErrors(formErrors);
-    
+
     return Object.keys(formErrors).length === 0;
   };
 
@@ -132,7 +180,6 @@ const Home = () => {
   };
 
   const searchClient = async () => {
-
     console.log(documentTypeId);
 
     if (!numberDocumentClient || !documentTypeId.value) {
@@ -150,6 +197,8 @@ const Home = () => {
         setClientName(
           `${client.data[0].nombres} ${client.data[0].apePaterno} ${client.data[0].apeMaterno}`
         );
+
+        setIsClientNameEditable(false); 
         toast.success("Cliente encontrado en base de datos interna!");
       } else {
         toast.error("Cliente no encontrado en base de datos interna.");
@@ -163,6 +212,7 @@ const Home = () => {
           );
 
           console.log(clientDni);
+          setIsClientNameEditable(false);
           toast.success("Cliente encontrado en API de DNI!");
           return;
         } else {
@@ -185,7 +235,6 @@ const Home = () => {
     }
 
     setShowModal(true);
-
   };
 
   const handleConfirm = async () => {
@@ -215,7 +264,6 @@ const Home = () => {
       setStoreId(null);
       setPromotionId(null);
       setDocumentTypeId(null);
-      
     } catch (error) {
       console.error("Error creating DataForm:", error);
       toast.error("Hubo un error al enviar el formulario.");
@@ -235,7 +283,7 @@ const Home = () => {
       />
 
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
-        <ToastContainer stacked />
+        <ToastContainer />
         <h1 className="text-4xl font-bold text-center mb-4 text-slate-800">
           Bienvenido
           {isAuthenticated && currentUser ? `, ${currentUser.userName}` : ""}
@@ -258,6 +306,7 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.store}</p>
               )}
             </div>
+            
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -266,6 +315,7 @@ const Home = () => {
                 placeholder="Nombre del cliente"
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
+                readOnly={!isClientNameEditable}
               />
               {errors.clientName && (
                 <p className="text-red-500 text-sm">{errors.clientName}</p>
@@ -290,7 +340,12 @@ const Home = () => {
                   type="text"
                   placeholder="Número de documento"
                   value={numberDocumentClient}
-                  onChange={(e) => setNumberDocumentClient(e.target.value)}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value.length <= 12) {
+                      setNumberDocumentClient(value);
+                    }
+                  }}
                 />
                 <button
                   type="button"
@@ -300,12 +355,15 @@ const Home = () => {
                   Buscar
                 </button>
               </div>
+
               {errors.numberDocumentClient && (
                 <p className="text-red-500 text-sm">
                   {errors.numberDocumentClient}
                 </p>
               )}
             </div>
+
+            
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
