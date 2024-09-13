@@ -214,7 +214,7 @@ const Home = () => {
     } catch (error) {
       if (!error.response.data.success) {
         const clientDni = await apiDni(numberDocumentClient);
-        if (clientDni && clientDni.result) {
+        if (clientDni && clientDni.http_code === 200) {
           setClientName(
             `${clientDni.result.nombres} ${clientDni.result.apellido_paterno} ${clientDni.result.apellido_materno}`
           );

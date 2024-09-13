@@ -2,8 +2,27 @@
 const DataForm = require('../models/DataForm');
 
 // Crear un nuevo DataForm
+
 const createDataForm = async (req, res) => {
   try {
+    const { numberDocumentClient, documentTypeId, promotionId } = req.body;
+
+    // Verificar si el cliente ya tiene la misma promoción
+    const existingDataForm = await DataForm.findOne({
+      where: {
+        numberDocumentClient,
+        documentTypeId,
+        promotionId
+      }
+    });
+
+    if (existingDataForm) {
+      return res.status(400).json({ 
+        error: "The client already has this promotion registered." 
+      });
+    }
+
+    // Si no existe un registro duplicado, crear el nuevo DataForm
     const dataForm = await DataForm.create(req.body);
     res.status(201).json(dataForm);
   } catch (error) {
