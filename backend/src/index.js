@@ -6,7 +6,7 @@ const cors = require("cors");
 const path = require("path");
 const http = require("http");
 require("dotenv").config();
-const config = require("../config");
+const config = require("../src/config");
 const app = express();
 
 // Puerto de la aplicación
