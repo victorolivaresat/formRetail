@@ -15,7 +15,7 @@ const Home = () => {
   const { currentUser, isAuthenticated, logoutUser } = useAuth();
   const [prevNumberDocumentLength, setPrevNumberDocumentLength] = useState(0);
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
-  
+
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
   const [ticketNumber, setTicketNumber] = useState("");
@@ -30,10 +30,6 @@ const Home = () => {
 
   const [isClientNameEditable, setIsClientNameEditable] = useState(false);
 
-  // Función que controla el comportamiento cuando el número de documento cambia
-
-
-
   useEffect(() => {
     // Solo borrar el nombre si el número de documento es más corto que el anterior
     if (numberDocumentClient.length < prevNumberDocumentLength) {
@@ -41,14 +37,26 @@ const Home = () => {
     }
     // Actualizar la longitud previa del número de documento
     setPrevNumberDocumentLength(numberDocumentClient.length);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numberDocumentClient]);
+
+  const [formData, setFormData] = useState({
+    clientName: "",
+    numberDocumentClient: "",
+    ticketNumber: "",
+    exchangeDate: "",
+    storeId: "",
+    promotionId: "",
+    documentTypeId: "",
+  });
 
   // Get all stores
   useEffect(() => {
     const fetchStores = async () => {
       try {
         const data = await getAllStores();
+
+        console.log(data);
         setStores(
           data.data.map((store) => ({
             value: store.storeId,
@@ -198,7 +206,7 @@ const Home = () => {
           `${client.data[0].nombres} ${client.data[0].apePaterno} ${client.data[0].apeMaterno}`
         );
 
-        setIsClientNameEditable(false); 
+        setIsClientNameEditable(false);
         toast.success("Cliente encontrado en base de datos interna!");
       } else {
         toast.error("Cliente no encontrado en base de datos interna.");
@@ -235,10 +243,21 @@ const Home = () => {
     }
 
     setShowModal(true);
+
+    setFormData({
+      clientName,
+      numberDocumentClient,
+      ticketNumber,
+      exchangeDate,
+      storeId: storeId ? storeId.label : "",
+      promotionId: promotionId ? promotionId.label : "",
+    });
+
   };
 
   const handleConfirm = async () => {
     setShowModal(false);
+    console.log(formData);
 
     try {
       const dataForm = {
@@ -280,6 +299,7 @@ const Home = () => {
         show={showModal}
         handleClose={handleClose}
         handleConfirm={handleConfirm}
+        formData={formData}
       />
 
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
@@ -306,7 +326,7 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.store}</p>
               )}
             </div>
-            
+
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -340,11 +360,14 @@ const Home = () => {
                   type="text"
                   placeholder="Número de documento"
                   value={numberDocumentClient}
-                  onChange={(e) => {
+                  onInput={(e) => {
                     const value = e.target.value;
                     if (value.length <= 12) {
                       setNumberDocumentClient(value);
                     }
+                  }}
+                  onPaste={() => {
+                    setNumberDocumentClient("");
                   }}
                 />
                 <button
@@ -362,8 +385,6 @@ const Home = () => {
                 </p>
               )}
             </div>
-
-            
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
