@@ -1,23 +1,43 @@
-//import React from 'react';
-import { Modal, Button } from 'react-bootstrap';
 import PropTypes from 'prop-types';
 
 const ConfirmationModal = ({ show, handleClose, handleConfirm }) => {
   return (
-    <Modal show={show} onHide={handleClose}>
-      <Modal.Header closeButton>
-        <Modal.Title>Confirmación de Validación</Modal.Title>
-      </Modal.Header>
-      <Modal.Body>¿Estás seguro que deseas cambiar el estado a Validado?</Modal.Body>
-      <Modal.Footer>
-        <Button variant="secondary" onClick={handleClose}>
-          Cancelar
-        </Button>
-        <Button variant="primary" onClick={handleConfirm}>
-          Confirmar
-        </Button>
-      </Modal.Footer>
-    </Modal>
+    <>
+      {show && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
+            <div className="flex justify-between items-center p-4 border-b border-gray-200">
+              <h3 className="text-xl font-semibold">Confirmación de registro</h3>
+              <button
+                className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                onClick={handleClose}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <div className="p-4">
+              <p>¿Estás seguro que deseas guardar este registro?</p>
+            </div>
+            <div className="flex justify-end p-4 border-t border-gray-200">
+              <button
+                className="bg-gray-500 text-white py-2 px-4 rounded-md hover:bg-gray-600 focus:outline-none mr-2"
+                onClick={handleClose}
+              >
+                Cancelar
+              </button>
+              <button
+                className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none"
+                onClick={handleConfirm}
+              >
+                Confirmar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -72,3 +72,11 @@ export const deleteDataForm = async (id) => {
     throw error;
   }
 };
+
+// Buscar un cliente por número de documento
+export const getClientByNumDoc = async (numberDocumentClient, documentTypeId) => {
+  const response = await axios.get(
+    `/clientes/document/${numberDocumentClient}/${documentTypeId}`
+  );
+  return response.data;
+};

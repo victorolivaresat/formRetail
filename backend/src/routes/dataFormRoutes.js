@@ -1,6 +1,6 @@
 // routes/dataFormRoutes.js
 const express = require('express');
-const router = express.Router();
+const routes = express.Router();
 const {
   createDataForm,
   getAllDataForms,
@@ -12,10 +12,10 @@ const authRequired = require('../app/middleware/validateToken');
 const { validateSchema } = require('../app/middleware/validateSchema');
 const { dataFormSchema }  = require('../app/validators/dataFormSchema');
 
-router.post('/data-forms', authRequired, validateSchema(dataFormSchema), createDataForm);
-router.get('/data-forms', getAllDataForms);
-router.get('/data-forms/:id', getDataFormById);
-router.put('/data-forms/:id', updateDataForm);
-router.delete('/data-forms/:id', deleteDataForm);
+routes.post('/data-forms', authRequired, validateSchema(dataFormSchema), createDataForm);
+routes.get('/data-forms', getAllDataForms);
+routes.get('/data-forms/:id', getDataFormById);
+routes.put('/data-forms/:id', updateDataForm);
+routes.delete('/data-forms/:id', deleteDataForm);
 
-module.exports = router;
+module.exports = routes;

@@ -25,8 +25,8 @@ export const AuthProvider = ({ children }) => {
         toast.success("¡Bienvenido!");
       }
     } catch (error) {
-      toast.error("Error al iniciar sesión. Por favor, inténtalo de nuevo.");
-      console.error("Error during login", error);
+      toast.error("Error al iniciar sesión. Por favor, inténtalo de nuevo. ");
+      console.error("Error during login", error.response.data.message);
     }
   };
 
@@ -36,11 +36,8 @@ export const AuthProvider = ({ children }) => {
       cookie.remove("token");
       setCurrentUser(null);
       setIsAuthenticated(false);
-      window.localStorage.removeItem("theme");
-      toast.success("¡Hasta pronto!");
     } catch (error) {
-      console.error("Error al cerrar sesión: ", error);
-      toast.error("Error al cerrar sesión. Por favor, inténtalo de nuevo.");
+      console.error("Error al cerrar sesión: ", error);;
     }
   };
 

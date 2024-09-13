@@ -1,41 +1,43 @@
+import ConfirmationModal from "../../utils/ConfirmationModal";
+import { toast, ToastContainer } from "react-toastify";
 import { useAuth } from "../../contexts/AuthContext";
 import { useState, useEffect } from "react";
-import Select from 'react-select';
-import { toast, ToastContainer } from 'react-toastify'; // Para los toasts
-import 'react-toastify/dist/ReactToastify.css'; // Estilos de react-toastify
+import Select from "react-select";
 import {
   getAllStores,
-  getAllPromotions,
-  getAllDocumentTypes,
   createDataForm,
+  getAllPromotions,
+  getClientByNumDoc,
+  getAllDocumentTypes,
 } from "../../api/dataFormApi";
 
 const Home = () => {
   const { currentUser, isAuthenticated, logoutUser } = useAuth();
 
-  // Estados para el formulario
-  const [clientName, setClientName] = useState("");
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
+  const [documentTypeId, setDocumentTypeId] = useState("");
+  const [documentTypes, setDocumentTypes] = useState([]);
   const [ticketNumber, setTicketNumber] = useState("");
   const [exchangeDate, setExchangeDate] = useState("");
-  const [store, setStore] = useState(null);
   const [promotionId, setPromotionId] = useState("");
-  const [documentTypeId, setDocumentTypeId] = useState("");
-  const [stores, setStores] = useState([]);
+  const [showModal, setShowModal] = useState(false); 
   const [promotions, setPromotions] = useState([]);
-  const [documentTypes, setDocumentTypes] = useState([]);
-  
-  // Estados de errores
+  const [clientName, setClientName] = useState("");
+  const [storeId, setStoreId] = useState(null);
+  const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
 
+  // Get all stores
   useEffect(() => {
     const fetchStores = async () => {
       try {
         const data = await getAllStores();
-        setStores(data.data.map(store => ({
-          value: store.storeId,
-          label: store.storeName
-        })));
+        setStores(
+          data.data.map((store) => ({
+            value: store.storeId,
+            label: store.storeName,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching stores:", error);
       }
@@ -44,14 +46,17 @@ const Home = () => {
     fetchStores();
   }, []);
 
+  // Get all document types
   useEffect(() => {
     const fetchDocumentTypes = async () => {
       try {
         const data = await getAllDocumentTypes();
-        setDocumentTypes(data.data.map(docType => ({
-          value: docType.documentTypeId,
-          label: docType.documentTypeName
-        })));
+        setDocumentTypes(
+          data.data.map((docType) => ({
+            value: docType.documentTypeId,
+            label: docType.documentTypeName,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching document types:", error);
       }
@@ -60,14 +65,17 @@ const Home = () => {
     fetchDocumentTypes();
   }, []);
 
+  // Get all promotions
   useEffect(() => {
     const fetchPromotions = async () => {
       try {
         const data = await getAllPromotions();
-        setPromotions(data.data.map(promotion => ({
-          value: promotion.promotionId,
-          label: promotion.promotionName
-        })));
+        setPromotions(
+          data.data.map((promotion) => ({
+            value: promotion.promotionId,
+            label: promotion.promotionName,
+          }))
+        );
       } catch (error) {
         console.error("Error fetching promotions:", error);
       }
@@ -78,16 +86,94 @@ const Home = () => {
 
   // Validaciones de formulario
   const validateForm = () => {
-    let formErrors = {};
-    if (!clientName) formErrors.clientName = "El nombre del cliente es obligatorio.";
-    if (!numberDocumentClient) formErrors.numberDocumentClient = "El número de documento es obligatorio.";
-    if (!ticketNumber) formErrors.ticketNumber = "El número de ticket es obligatorio.";
-    if (!exchangeDate) formErrors.exchangeDate = "La fecha es obligatoria.";
-    if (!store) formErrors.store = "Debe seleccionar una tienda.";
-    if (!promotionId) formErrors.promotionId = "Debe seleccionar una promoción.";
-    if (!documentTypeId) formErrors.documentTypeId = "Debe seleccionar un tipo de documento.";
+    const requiredFields = [
+      { field: clientName, name: "clientName", message: "El nombre del cliente es obligatorio." },
+      { field: numberDocumentClient, name: "numberDocumentClient", message: "El número de documento es obligatorio." },
+      { field: ticketNumber, name: "ticketNumber", message: "El número de ticket es obligatorio." },
+      { field: exchangeDate, name: "exchangeDate", message: "La fecha es obligatoria." },
+      { field: storeId, name: "store", message: "Debe seleccionar una tienda." },
+      { field: promotionId, name: "promotionId", message: "Debe seleccionar una promoción." },
+      { field: documentTypeId, name: "documentTypeId", message: "Debe seleccionar un tipo de documento." },
+    ];
+  
+    const formErrors = requiredFields.reduce((errors, { field, name, message }) => {
+      if (!field) errors[name] = message;
+      return errors;
+    }, {});
+  
     setErrors(formErrors);
+    
     return Object.keys(formErrors).length === 0;
+  };
+
+  const apiDni = async (dni) => {
+    const token = import.meta.env.VITE_API_KEY;
+    const url = `https://api.apuestatotal.com/v2/dni?dni=${dni}`;
+
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        console.error("Error consultando cliente", response.status);
+        return null;
+      }
+    } catch (error) {
+      console.error("Error en la petición:", error);
+      return null;
+    }
+  };
+
+  const searchClient = async () => {
+
+    console.log(documentTypeId);
+
+    if (!numberDocumentClient || !documentTypeId.value) {
+      toast.error("Debe ingresar el número y tipo de documento.");
+      return;
+    }
+
+    try {
+      const client = await getClientByNumDoc(
+        numberDocumentClient,
+        documentTypeId.value
+      );
+
+      if (client && client.data && client.data.length > 0) {
+        setClientName(
+          `${client.data[0].nombres} ${client.data[0].apePaterno} ${client.data[0].apeMaterno}`
+        );
+        toast.success("Cliente encontrado en base de datos interna!");
+      } else {
+        toast.error("Cliente no encontrado en base de datos interna.");
+      }
+    } catch (error) {
+      if (!error.response.data.success) {
+        const clientDni = await apiDni(numberDocumentClient);
+        if (clientDni && clientDni.result) {
+          setClientName(
+            `${clientDni.result.nombres} ${clientDni.result.apellido_paterno} ${clientDni.result.apellido_materno}`
+          );
+
+          console.log(clientDni);
+          toast.success("Cliente encontrado en API de DNI!");
+          return;
+        } else {
+          toast.info(
+            "Cliente no encontrado en API de DNI, buscando en base de datos interna."
+          );
+        }
+      }
+      console.error("Error buscando cliente:", error.response.data.message);
+      toast.error("Hubo un error al buscar el cliente.");
+    }
   };
 
   // Maneja el envío del formulario
@@ -98,42 +184,58 @@ const Home = () => {
       return;
     }
 
+    setShowModal(true);
+
+  };
+
+  const handleConfirm = async () => {
+    setShowModal(false);
+
     try {
       const dataForm = {
         userId: parseInt(currentUser.userId, 10),
         exchangeDate: new Date(exchangeDate).toISOString(),
         clientName,
         numberDocumentClient,
-        storeId: store ? store.value : "",
-        promotionId: parseInt(promotionId, 10),
+        storeId: storeId ? storeId.value : "",
+        promotionId: parseInt(promotionId.value, 10),
         ticketNumber,
-        documentTypeId: parseInt(documentTypeId, 10),
+        documentTypeId: parseInt(documentTypeId.value, 10),
       };
 
       const response = await createDataForm(dataForm);
       console.log("DataForm created:", response);
 
       toast.success("Formulario enviado con éxito!");
-      
-      // Resetear formulario
+
       setClientName("");
       setNumberDocumentClient("");
       setTicketNumber("");
       setExchangeDate("");
-      setStore(null);
-      setPromotionId("");
-      setDocumentTypeId("");
-
+      setStoreId(null);
+      setPromotionId(null);
+      setDocumentTypeId(null);
+      
     } catch (error) {
       console.error("Error creating DataForm:", error);
       toast.error("Hubo un error al enviar el formulario.");
     }
   };
 
+  const handleClose = () => {
+    setShowModal(false);
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
+      <ConfirmationModal
+        show={showModal}
+        handleClose={handleClose}
+        handleConfirm={handleConfirm}
+      />
+
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
-        <ToastContainer /> {/* Contenedor para mostrar los toasts */}
+        <ToastContainer stacked />
         <h1 className="text-4xl font-bold text-center mb-4 text-slate-800">
           Bienvenido
           {isAuthenticated && currentUser ? `, ${currentUser.userName}` : ""}
@@ -143,17 +245,18 @@ const Home = () => {
             ? "Has iniciado sesión con éxito. ¡Registra la promoción!"
             : "Por favor, inicia sesión para acceder a tu cuenta."}
         </p>
-
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div className="mb-4">
               <Select
                 options={stores}
                 placeholder="Selecciona una tienda"
-                value={store}
-                onChange={setStore}
+                value={storeId}
+                onChange={setStoreId}
               />
-              {errors.store && <p className="text-red-500 text-sm">{errors.store}</p>}
+              {errors.store && (
+                <p className="text-red-500 text-sm">{errors.store}</p>
+              )}
             </div>
             <div className="mb-4">
               <input
@@ -164,65 +267,87 @@ const Home = () => {
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
               />
-              {errors.clientName && <p className="text-red-500 text-sm">{errors.clientName}</p>}
+              {errors.clientName && (
+                <p className="text-red-500 text-sm">{errors.clientName}</p>
+              )}
             </div>
             <div className="mb-4">
               <Select
                 options={documentTypes}
                 placeholder="Tipo de documento"
-                value={documentTypes.find(docType => docType.value === documentTypeId)}
-                onChange={selected => setDocumentTypeId(selected ? selected.value : "")}
+                value={documentTypeId}
+                onChange={setDocumentTypeId}
               />
-              {errors.documentTypeId && <p className="text-red-500 text-sm">{errors.documentTypeId}</p>}
+              {errors.documentTypeId && (
+                <p className="text-red-500 text-sm">{errors.documentTypeId}</p>
+              )}
             </div>
             <div className="mb-4">
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="numberDocumentClient"
-                type="text"
-                placeholder="Numero de documento"
-                value={numberDocumentClient}
-                onChange={(e) => setNumberDocumentClient(e.target.value)}
-              />
-              {errors.numberDocumentClient && <p className="text-red-500 text-sm">{errors.numberDocumentClient}</p>}
+              <div className="flex">
+                <input
+                  className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                  id="numberDocumentClient"
+                  type="text"
+                  placeholder="Número de documento"
+                  value={numberDocumentClient}
+                  onChange={(e) => setNumberDocumentClient(e.target.value)}
+                />
+                <button
+                  type="button"
+                  className="bg-blue-600 text-white py-2 px-4 rounded ml-2 hover:bg-blue-500 focus:outline-none focus:shadow-outline"
+                  onClick={searchClient}
+                >
+                  Buscar
+                </button>
+              </div>
+              {errors.numberDocumentClient && (
+                <p className="text-red-500 text-sm">
+                  {errors.numberDocumentClient}
+                </p>
+              )}
             </div>
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
                 type="text"
-                placeholder="Ingresa el numero de ticket"
+                placeholder="Ingresa el número de ticket"
                 value={ticketNumber}
                 onChange={(e) => setTicketNumber(e.target.value)}
               />
-              {errors.ticketNumber && <p className="text-red-500 text-sm">{errors.ticketNumber}</p>}
+              {errors.ticketNumber && (
+                <p className="text-red-500 text-sm">{errors.ticketNumber}</p>
+              )}
             </div>
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="exchangeDate"
                 type="date"
-                placeholder="Ingresa la fecha de la promocion"
+                placeholder="Fecha de intercambio"
                 value={exchangeDate}
                 onChange={(e) => setExchangeDate(e.target.value)}
               />
-              {errors.exchangeDate && <p className="text-red-500 text-sm">{errors.exchangeDate}</p>}
+              {errors.exchangeDate && (
+                <p className="text-red-500 text-sm">{errors.exchangeDate}</p>
+              )}
             </div>
             <div className="mb-4">
               <Select
                 options={promotions}
-                placeholder="Selecciona una promocion"
-                value={promotions.find(promotion => promotion.value === promotionId)}
-                onChange={selected => setPromotionId(selected ? selected.value : "")}
+                placeholder="Selecciona una promoción"
+                value={promotionId}
+                onChange={setPromotionId}
               />
-              {errors.promotionId && <p className="text-red-500 text-sm">{errors.promotionId}</p>}
+              {errors.promotionId && (
+                <p className="text-red-500 text-sm">{errors.promotionId}</p>
+              )}
             </div>
           </div>
 
-          <hr className="my-8" />
-          <div className="flex items-center justify-center mx-8 my-2 gap-6">
+          <div className="flex justify-center mt-8 gap-8">
             <button
-              className="bg-blue-900 text-white py-2 px-8 rounded hover:bg-blue-800 focus:outline-none focus:shadow-outline"
+              className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-500 focus:outline-none focus:shadow-outline"
               type="submit"
             >
               Enviar
