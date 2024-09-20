@@ -12,5 +12,6 @@ const authRequired = require("../app/middleware/validateToken");
  */
 // Stores
 routes.get("/stores", authRequired, storeController.getAllStores);
+routes.get("/allFalt/:storeId", authRequired, storeController.getAllUsers1);
 
 module.exports = routes;
