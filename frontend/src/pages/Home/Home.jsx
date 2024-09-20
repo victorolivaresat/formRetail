@@ -9,6 +9,7 @@ import {
   getAllPromotions,
   getClientByNumDoc,
   getAllDocumentTypes,
+  getAllFalt,
 } from "../../api/dataFormApi";
 
 const Home = () => {
@@ -27,6 +28,9 @@ const Home = () => {
   const [storeId, setStoreId] = useState(null);
   const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
+
+  const [formData2, setFormData2] = useState({});
+  
 
   const [isClientNameEditable, setIsClientNameEditable] = useState(false);
 
@@ -56,11 +60,14 @@ const Home = () => {
       try {
         const data = await getAllStores();
 
-        console.log(data);
+        //console.log("Log-UserEffet: "+data);
+        
         setStores(
           data.data.map((store) => ({
             value: store.storeId,
             label: store.storeName,
+            labell: store.district,
+            
           }))
         );
       } catch (error) {
@@ -70,6 +77,7 @@ const Home = () => {
 
     fetchStores();
   }, []);
+
 
   // Get all document types
   useEffect(() => {
@@ -81,6 +89,7 @@ const Home = () => {
             value: docType.documentTypeId,
             label: docType.documentTypeName,
           }))
+
         );
       } catch (error) {
         console.error("Error fetching document types:", error);
@@ -243,6 +252,20 @@ const Home = () => {
     }
 
     setShowModal(true);
+    
+    const data2 = await getAllFalt(storeId.value);
+    console.log(data2); // Agrega un console.log para ver qué estás recibiendo
+
+    if (data2 && data2.success && data2.data.length > 0) {
+      setFormData2({ supervisorNombre: data2.data[0].supervisorNombre,
+        zonaNombre: data2.data[0].zonaNombre 
+       }); // Asegúrate de que esto sea un objeto
+    } else {
+      toast.error("No se encontraron datos para el storeId");
+    }
+
+    
+  
 
     setFormData({
       clientName,
@@ -251,7 +274,13 @@ const Home = () => {
       exchangeDate,
       storeId: storeId ? storeId.label : "",
       promotionId: promotionId ? promotionId.label : "",
+
     });
+
+    
+
+
+   
 
   };
 
@@ -268,10 +297,12 @@ const Home = () => {
         storeId: storeId ? storeId.value : "",
         promotionId: parseInt(promotionId.value, 10),
         ticketNumber,
+        
         documentTypeId: parseInt(documentTypeId.value, 10),
       };
 
       const response = await createDataForm(dataForm);
+      
       console.log("DataForm created:", response);
 
       toast.success("Formulario enviado con éxito!");
@@ -300,6 +331,7 @@ const Home = () => {
         handleClose={handleClose}
         handleConfirm={handleConfirm}
         formData={formData}
+        formData2={formData2}
       />
 
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
@@ -386,13 +418,20 @@ const Home = () => {
               )}
             </div>
             <div className="mb-4">
+
+
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
                 type="text"
                 placeholder="Ingresa el número de ticket"
                 value={ticketNumber}
-                onChange={(e) => setTicketNumber(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (value.length <= 6) {
+                    setTicketNumber(value);
+                  }
+                  }}
               />
               {errors.ticketNumber && (
                 <p className="text-red-500 text-sm">{errors.ticketNumber}</p>

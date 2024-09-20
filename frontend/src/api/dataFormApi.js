@@ -6,6 +6,15 @@ export const getAllStores = async () => {
   return data;
 };
 
+export const getAllFalt = async (storeId) => {
+
+  const { data } = await axios.get(`allFalt/${storeId}`);
+  //const { data } = await axios.delete(`data-forms/${id}`);
+  return data;
+
+
+};
+
 // Get All Promotions
 export const getAllPromotions = async () => {
   const { data } = await axios.get("promotions");
