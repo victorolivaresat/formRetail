@@ -11,6 +11,7 @@ module.exports = {
       options: {
         encrypt: false,
         trustServerCertificate: false,
+        useUTC: false, // for reading server dates
       },
     },
   },

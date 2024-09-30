@@ -15,6 +15,7 @@ const sequelize = new Sequelize(
     dialect: config.DATABASE.DIALECT,
     port: config.DATABASE.PORT,
     dialectOptions: config.DATABASE.DIALECT_OPTIONS,
+    timezone: "America/Lima",
   }
 );
 
