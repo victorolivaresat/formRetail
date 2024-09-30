@@ -9,14 +9,13 @@ import {
   getAllPromotions,
   getClientByNumDoc,
   getAllDocumentTypes,
-  getAllFalt,
+  getStoreDetails,
 } from "../../api/dataFormApi";
 
 const Home = () => {
   const { currentUser, isAuthenticated, logoutUser } = useAuth();
   const [prevNumberDocumentLength, setPrevNumberDocumentLength] = useState(0);
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
-
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
   const [ticketNumber, setTicketNumber] = useState("");
@@ -25,9 +24,10 @@ const Home = () => {
   const [showModal, setShowModal] = useState(false);
   const [promotions, setPromotions] = useState([]);
   const [clientName, setClientName] = useState("");
-  const [storeId, setStoreId] = useState(null);
+  const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
+  const [ path, setPath ] = useState("");
 
   const [formData2, setFormData2] = useState({});
   
@@ -52,6 +52,7 @@ const Home = () => {
     storeId: "",
     promotionId: "",
     documentTypeId: "",
+    path: "",
   });
 
   // Get all stores
@@ -60,8 +61,6 @@ const Home = () => {
       try {
         const data = await getAllStores();
 
-        //console.log("Log-UserEffet: "+data);
-        
         setStores(
           data.data.map((store) => ({
             value: store.storeId,
@@ -156,6 +155,11 @@ const Home = () => {
         name: "documentTypeId",
         message: "Debe seleccionar un tipo de documento.",
       },
+      {
+        field: path,
+        name: "path",
+        message: "Debe seleccionar una ruta.",
+      }
     ];
 
     const formErrors = requiredFields.reduce(
@@ -253,19 +257,16 @@ const Home = () => {
 
     setShowModal(true);
     
-    const data2 = await getAllFalt(storeId.value);
-    console.log(data2); // Agrega un console.log para ver qué estás recibiendo
+    const data2 = await getStoreDetails(storeId.value);
+    console.log(data2);
 
     if (data2 && data2.success && data2.data.length > 0) {
       setFormData2({ supervisorNombre: data2.data[0].supervisorNombre,
         zonaNombre: data2.data[0].zonaNombre 
-       }); // Asegúrate de que esto sea un objeto
+       });
     } else {
       toast.error("No se encontraron datos para el storeId");
     }
-
-    
-  
 
     setFormData({
       clientName,
@@ -274,13 +275,10 @@ const Home = () => {
       exchangeDate,
       storeId: storeId ? storeId.label : "",
       promotionId: promotionId ? promotionId.label : "",
-
+      path,
+      documentTypeId: documentTypeId ? documentTypeId.label : "",
+      ...formData2
     });
-
-    
-
-
-   
 
   };
 
@@ -297,7 +295,7 @@ const Home = () => {
         storeId: storeId ? storeId.value : "",
         promotionId: parseInt(promotionId.value, 10),
         ticketNumber,
-        
+        path,
         documentTypeId: parseInt(documentTypeId.value, 10),
       };
 
@@ -311,9 +309,10 @@ const Home = () => {
       setNumberDocumentClient("");
       setTicketNumber("");
       setExchangeDate("");
-      setStoreId(null);
-      setPromotionId(null);
-      setDocumentTypeId(null);
+      setStoreId("");
+      setPromotionId("");
+      setDocumentTypeId("");
+      setPath("");
     } catch (error) {
       console.error("Error creating DataForm:", error);
       toast.error("Hubo un error al enviar el formulario: " + error.response.data.error);
@@ -358,7 +357,6 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.store}</p>
               )}
             </div>
-
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -418,8 +416,6 @@ const Home = () => {
               )}
             </div>
             <div className="mb-4">
-
-
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
@@ -428,7 +424,7 @@ const Home = () => {
                 value={ticketNumber}
                 onChange={(e) => {
                   const value = e.target.value
-                  if (value.length <= 6) {
+                  if (value.length <= 12) {
                     setTicketNumber(value);
                   }
                   }}
@@ -448,6 +444,19 @@ const Home = () => {
               />
               {errors.exchangeDate && (
                 <p className="text-red-500 text-sm">{errors.exchangeDate}</p>
+              )}
+            </div>
+            <div className="mb-4">
+              <input
+                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                id="path"
+                type="url"
+                placeholder="URL de la imagen"
+                onChange={(e) => setPath(e.target.value)}
+                value={path}
+              />
+              {errors.path && (
+                <p className="text-red-500 text-sm">{errors.path}</p>
               )}
             </div>
             <div className="mb-4">

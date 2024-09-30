@@ -22,12 +22,12 @@ const dataFormSchema = zod.object({
   numberDocumentClient: zod
     .string()
     .min(1, { message: "Number document client is required" })
-    .max(50, { message: "Number document client cannot exceed 50 characters" }),
+    .max(12, { message: "Number document client cannot exceed 12 characters" }),
 
   ticketNumber: zod
     .string()
     .min(1, { message: "Ticket number is required" })
-    .max(50, { message: "Ticket number cannot exceed 50 characters" }),
+    .max(12, { message: "Ticket number cannot exceed 12 characters" }),
 
   image: zod
     .string()

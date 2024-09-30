@@ -9,12 +9,13 @@ const {
   deleteCliente,
   getClienteByNumDoc,
 } = require('../app/controllers/gestionClienteController');
+const authRequired = require("../app/middleware/validateToken");
 
-routes.get('/clientes', getAllClientes);
-routes.get('/clienteas/:id', getClienteById);
-routes.get('/clientes/document/:id/:documentTypeId', getClienteByNumDoc);
-routes.post('/clientes', createCliente);
-routes.put('/clientes/:id', updateCliente);
-routes.delete('/clientes/:id', deleteCliente);
+routes.get('/clientes', authRequired, getAllClientes);
+routes.get('/clienteas/:id', authRequired, getClienteById);
+routes.get('/clientes/document/:id/:documentTypeId',  authRequired, getClienteByNumDoc);
+routes.post('/clientes',  authRequired, createCliente);
+routes.put('/clientes/:id',  authRequired, updateCliente);
+routes.delete('/clientes/:id',  authRequired, deleteCliente);
 
 module.exports = routes;

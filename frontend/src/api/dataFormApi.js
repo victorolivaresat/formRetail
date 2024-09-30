@@ -6,12 +6,11 @@ export const getAllStores = async () => {
   return data;
 };
 
-export const getAllFalt = async (storeId) => {
 
-  const { data } = await axios.get(`allFalt/${storeId}`);
-  //const { data } = await axios.delete(`data-forms/${id}`);
+export const getStoreDetails = async (storeId) => {
+
+  const { data } = await axios.get(`stores/${storeId}`);
   return data;
-
 
 };
 
