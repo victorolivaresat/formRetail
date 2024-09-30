@@ -27,7 +27,7 @@ const dataFormSchema = zod.object({
   ticketNumber: zod
     .string()
     .min(1, { message: "Ticket number is required" })
-    .max(12, { message: "Ticket number cannot exceed 12 characters" }),
+    .max(10, { message: "Ticket number cannot exceed 10 characters" }),
 
   image: zod
     .string()

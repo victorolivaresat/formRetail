@@ -315,7 +315,7 @@ const Home = () => {
       setPath("");
     } catch (error) {
       console.error("Error creating DataForm:", error);
-      toast.error("Hubo un error al enviar el formulario: " + error.response.data.error);
+      toast.error(error.response.data.error);
     }
   };
 
@@ -420,11 +420,11 @@ const Home = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
                 type="text"
-                placeholder="Ingresa el número de ticket"
+                placeholder="Ingresa el número de ticket - ATERAX"
                 value={ticketNumber}
                 onChange={(e) => {
                   const value = e.target.value
-                  if (value.length <= 12) {
+                  if (value.length <= 10) {
                     setTicketNumber(value);
                   }
                   }}

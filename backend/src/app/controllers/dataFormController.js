@@ -1,34 +1,81 @@
 // controllers/dataFormController.js
 const DataForm = require('../models/DataForm');
+const sequelize = require("../../config/database");
+const { QueryTypes } = require('sequelize');
 
 // Crear un nuevo DataForm
+
+// const createDataForm = async (req, res) => {
+//   try {
+//     const { numberDocumentClient, documentTypeId, promotionId } = req.body;
+
+//     // Verificar si el cliente ya tiene la misma promoción
+//     const existingDataForm = await DataForm.findOne({
+//       where: {
+//         numberDocumentClient,
+//         documentTypeId,
+//         promotionId
+//       }
+//     });
+
+//     // if (existingDataForm) {
+//     //   return res.status(400).json({ 
+//     //     error: "El cliente ya tiene esta promoción registrada." 
+//     //   });
+//     // }
+
+//     // Si no existe un registro duplicado, crear el nuevo DataForm
+//     const dataForm = await DataForm.create(req.body);
+//     res.status(201).json(dataForm);
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ error: "Error creating data form: " + error });
+//   }
+
+// };
+
 
 const createDataForm = async (req, res) => {
   try {
     const { numberDocumentClient, documentTypeId, promotionId } = req.body;
 
-    // Verificar si el cliente ya tiene la misma promoción
-    const existingDataForm = await DataForm.findOne({
-      where: {
-        numberDocumentClient,
-        documentTypeId,
-        promotionId
+    // Llamar al procedimiento almacenado para validar la promoción
+    const validation = await sequelize.query(
+      "EXEC [dbo].[sp_validateDataForm] @numberDocumentId = :numberDocumentId, @documentTypeId = :documentTypeId, @promotionId = :promotionId",
+      {
+        replacements: {
+          numberDocumentId: numberDocumentClient,
+          documentTypeId: documentTypeId,
+          promotionId: promotionId
+        },
+        type: QueryTypes.RAW,
       }
-    });
+    );
 
-    if (existingDataForm) {
+    // Verificar si el procedimiento almacenado devolvió un error
+    if (validation && validation.error) {
       return res.status(400).json({ 
-        error: "El cliente ya tiene esta promoción registrada." 
+        error: validation.error.message || "Error al validar la promoción del cliente." 
       });
     }
 
-    // Si no existe un registro duplicado, crear el nuevo DataForm
+    // Si la validación es exitosa, crear el nuevo DataForm
     const dataForm = await DataForm.create(req.body);
     res.status(201).json(dataForm);
+
   } catch (error) {
     console.error(error);
-    res.status(400).json({ error: "Error creating data form" });
+
+    // Reemplazar "SequelizeDatabaseError: " por una cadena vacía
+    const errorMessage = error.message.replace('SequelizeDatabaseError: ', '');
+
+    // Devolver solo el mensaje de error limpio
+    return res.status(400).json({ error: errorMessage });
   }
+};
+
+module.exports = {
+  createDataForm
 };
 
 // Leer todos los DataForms
