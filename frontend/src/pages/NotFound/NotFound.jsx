@@ -1,7 +1,7 @@
 import { FaExclamationCircle } from "react-icons/fa";
 import LoaderPage from "../../utils/LoaderPage";
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom"; // Asegúrate de usar Link de react-router
+import { Link } from "react-router-dom";
 
 const NotFound = () => {
   const [loading, setLoading] = useState(true);

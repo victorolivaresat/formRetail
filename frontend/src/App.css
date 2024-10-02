@@ -1,0 +1,54 @@
+
+.loader-page {
+    width: 50px;
+    aspect-ratio: 1;
+    display: grid;
+    border: 4px solid #0000;
+    border-radius: 50%;
+    border-color: #242424 #0000;
+    animation: l16 1s infinite linear;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    z-index: 1000;
+  }
+  
+  .loader-page::before,
+  .loader-page::after {
+    content: "";
+    grid-area: 1/1;
+    margin: 2px;
+    border: inherit;
+    border-radius: 50%;
+  }
+  
+  .loader-page::before {
+    border-color: #f03355 #0000;
+    animation: inherit;
+    animation-duration: .5s;
+    animation-direction: reverse;
+  }
+  
+  .loader-page::after {
+    margin: 8px;
+  }
+  
+  .loader-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  @keyframes l16 {
+    100% {
+      transform: rotate(1turn)
+    }
+  }
+  

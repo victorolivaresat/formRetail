@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 
-const ConfirmationModal = ({ show, handleClose, handleConfirm, formData, formData2 }) => {
+const ConfirmationModal = ({ show, handleClose, handleConfirm, formData, formDataConfirm }) => {
   return (
     <>
       {show && (
@@ -37,10 +37,10 @@ const ConfirmationModal = ({ show, handleClose, handleConfirm, formData, formDat
                   <strong>Tienda:</strong> {formData.storeId}
                 </p>
                 <p>
-                  <strong>Zona:</strong> {formData2.zonaNombre}
+                  <strong>Zona:</strong> {formDataConfirm.zonaNombre}
                 </p>
                 <p>
-                  <strong>Supervisor:</strong> {formData2.supervisorNombre}
+                  <strong>Supervisor:</strong> {formDataConfirm.supervisorNombre}
                 </p>
                 
                 <br />
@@ -92,7 +92,7 @@ ConfirmationModal.propTypes = {
   handleClose: PropTypes.func.isRequired,
   handleConfirm: PropTypes.func.isRequired,
   formData: PropTypes.object.isRequired,
-  formData2: PropTypes.object.isRequired,
+  formDataConfirm: PropTypes.object.isRequired,
 };
 
 export default ConfirmationModal;

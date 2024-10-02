@@ -14,12 +14,15 @@ import {
 
 const Home = () => {
   const { currentUser, isAuthenticated, logoutUser } = useAuth();
+  const [exchangeDate, setExchangeDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
   const [prevNumberDocumentLength, setPrevNumberDocumentLength] = useState(0);
+  const [isClientNameEditable, setIsClientNameEditable] = useState(false);
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
   const [ticketNumber, setTicketNumber] = useState("");
-  const [exchangeDate, setExchangeDate] = useState("");
   const [promotionId, setPromotionId] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [promotions, setPromotions] = useState([]);
@@ -27,19 +30,13 @@ const Home = () => {
   const [storeId, setStoreId] = useState("");
   const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
-  const [ path, setPath ] = useState("");
-
-  const [formData2, setFormData2] = useState({});
-  
-
-  const [isClientNameEditable, setIsClientNameEditable] = useState(false);
+  const [path, setPath] = useState("");
+  const [formDataConfirm, setFormDataConfirm] = useState({});
 
   useEffect(() => {
-    // Solo borrar el nombre si el número de documento es más corto que el anterior
     if (numberDocumentClient.length < prevNumberDocumentLength) {
       setClientName("");
     }
-    // Actualizar la longitud previa del número de documento
     setPrevNumberDocumentLength(numberDocumentClient.length);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [numberDocumentClient]);
@@ -66,7 +63,6 @@ const Home = () => {
             value: store.storeId,
             label: store.storeName,
             labell: store.district,
-            
           }))
         );
       } catch (error) {
@@ -76,7 +72,6 @@ const Home = () => {
 
     fetchStores();
   }, []);
-
 
   // Get all document types
   useEffect(() => {
@@ -88,7 +83,6 @@ const Home = () => {
             value: docType.documentTypeId,
             label: docType.documentTypeName,
           }))
-
         );
       } catch (error) {
         console.error("Error fetching document types:", error);
@@ -159,7 +153,7 @@ const Home = () => {
         field: path,
         name: "path",
         message: "Debe seleccionar una ruta.",
-      }
+      },
     ];
 
     const formErrors = requiredFields.reduce(
@@ -256,14 +250,15 @@ const Home = () => {
     }
 
     setShowModal(true);
-    
+
     const data2 = await getStoreDetails(storeId.value);
     console.log(data2);
 
     if (data2 && data2.success && data2.data.length > 0) {
-      setFormData2({ supervisorNombre: data2.data[0].supervisorNombre,
-        zonaNombre: data2.data[0].zonaNombre 
-       });
+      setFormDataConfirm({
+        supervisorNombre: data2.data[0].supervisorNombre,
+        zonaNombre: data2.data[0].zonaNombre,
+      });
     } else {
       toast.error("No se encontraron datos para el storeId");
     }
@@ -277,9 +272,8 @@ const Home = () => {
       promotionId: promotionId ? promotionId.label : "",
       path,
       documentTypeId: documentTypeId ? documentTypeId.label : "",
-      ...formData2
+      ...formDataConfirm,
     });
-
   };
 
   const handleConfirm = async () => {
@@ -300,7 +294,7 @@ const Home = () => {
       };
 
       const response = await createDataForm(dataForm);
-      
+
       console.log("DataForm created:", response);
 
       toast.success("Formulario enviado con éxito!");
@@ -330,7 +324,7 @@ const Home = () => {
         handleClose={handleClose}
         handleConfirm={handleConfirm}
         formData={formData}
-        formData2={formData2}
+        formDataConfirm={formDataConfirm}
       />
 
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
@@ -346,6 +340,7 @@ const Home = () => {
         </p>
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {/* Stores */}
             <div className="mb-4">
               <Select
                 options={stores}
@@ -357,6 +352,8 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.store}</p>
               )}
             </div>
+
+            {/* ClientName */}
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -371,17 +368,26 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.clientName}</p>
               )}
             </div>
-            <div className="mb-4">
-              <Select
-                options={documentTypes}
-                placeholder="Tipo de documento"
-                value={documentTypeId}
-                onChange={setDocumentTypeId}
-              />
-              {errors.documentTypeId && (
-                <p className="text-red-500 text-sm">{errors.documentTypeId}</p>
-              )}
-            </div>
+
+            {/* DocumentTypeId */}
+            <Select
+              options={documentTypes}
+              placeholder="Tipo de documento"
+              value={documentTypeId}
+              onChange={(selectedOption) => {
+                setDocumentTypeId(selectedOption);
+                if (
+                  selectedOption.label === "CE" ||
+                  selectedOption.label === "Pasaporte"
+                ) {
+                  setIsClientNameEditable(true);
+                } else {
+                  setIsClientNameEditable(false);
+                }
+              }}
+            />
+
+            {/* NumberDocumentClient */}
             <div className="mb-4">
               <div className="flex">
                 <input
@@ -415,6 +421,8 @@ const Home = () => {
                 </p>
               )}
             </div>
+
+            {/* TicketNumber */}
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -423,16 +431,18 @@ const Home = () => {
                 placeholder="Ingresa el número de ticket - ATERAX"
                 value={ticketNumber}
                 onChange={(e) => {
-                  const value = e.target.value
+                  const value = e.target.value;
                   if (value.length <= 10) {
                     setTicketNumber(value);
                   }
-                  }}
+                }}
               />
               {errors.ticketNumber && (
                 <p className="text-red-500 text-sm">{errors.ticketNumber}</p>
               )}
             </div>
+
+            {/* ExchangeDate */}
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -446,6 +456,8 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.exchangeDate}</p>
               )}
             </div>
+
+            {/* Path */}
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
@@ -459,6 +471,8 @@ const Home = () => {
                 <p className="text-red-500 text-sm">{errors.path}</p>
               )}
             </div>
+
+            {/* PromotionId */}
             <div className="mb-4">
               <Select
                 options={promotions}
@@ -473,12 +487,15 @@ const Home = () => {
           </div>
 
           <div className="flex justify-center mt-8 gap-8">
+            {/* Send */}
             <button
               className="bg-indigo-600 text-white py-2 px-4 rounded hover:bg-indigo-500 focus:outline-none focus:shadow-outline"
               type="submit"
             >
               Enviar
             </button>
+
+            {/* Logout */}
             <button
               className="bg-gray-900 text-white py-2 px-8 rounded hover:bg-gray-800 focus:outline-none focus:shadow-outline"
               type="button"

@@ -18,12 +18,6 @@ const { QueryTypes } = require('sequelize');
 //       }
 //     });
 
-//     // if (existingDataForm) {
-//     //   return res.status(400).json({ 
-//     //     error: "El cliente ya tiene esta promoción registrada." 
-//     //   });
-//     // }
-
 //     // Si no existe un registro duplicado, crear el nuevo DataForm
 //     const dataForm = await DataForm.create(req.body);
 //     res.status(201).json(dataForm);
@@ -46,7 +40,7 @@ const createDataForm = async (req, res) => {
         replacements: {
           numberDocumentId: numberDocumentClient,
           documentTypeId: documentTypeId,
-          promotionId: promotionId
+          promotionId: promotionId,
         },
         type: QueryTypes.RAW,
       }
@@ -54,28 +48,26 @@ const createDataForm = async (req, res) => {
 
     // Verificar si el procedimiento almacenado devolvió un error
     if (validation && validation.error) {
-      return res.status(400).json({ 
-        error: validation.error.message || "Error al validar la promoción del cliente." 
+      return res.status(400).json({
+        error:
+          validation.error.message ||
+          "Error al validar la promoción del cliente.",
       });
     }
 
     // Si la validación es exitosa, crear el nuevo DataForm
     const dataForm = await DataForm.create(req.body);
     res.status(201).json(dataForm);
-
   } catch (error) {
     console.error(error);
 
-    // Reemplazar "SequelizeDatabaseError: " por una cadena vacía
-    const errorMessage = error.message.replace('SequelizeDatabaseError: ', '');
-
     // Devolver solo el mensaje de error limpio
-    return res.status(400).json({ error: errorMessage });
+    return res.status(400).json({ error: `Error creating data form: ${error.message}` });
   }
 };
 
 module.exports = {
-  createDataForm
+  createDataForm,
 };
 
 // Leer todos los DataForms
