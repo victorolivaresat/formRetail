@@ -370,22 +370,26 @@ const Home = () => {
             </div>
 
             {/* DocumentTypeId */}
-            <Select
-              options={documentTypes}
-              placeholder="Tipo de documento"
-              value={documentTypeId}
-              onChange={(selectedOption) => {
-                setDocumentTypeId(selectedOption);
-                if (
-                  selectedOption.label === "CE" ||
-                  selectedOption.label === "Pasaporte"
-                ) {
-                  setIsClientNameEditable(true);
-                } else {
-                  setIsClientNameEditable(false);
-                }
-              }}
-            />
+            <div className="mb-4">
+              <Select
+                options={documentTypes}
+                placeholder="Tipo de documento"
+                value={documentTypeId}
+                onChange={(selectedOption) => {
+                  setDocumentTypeId(selectedOption);
+                  if (
+                    selectedOption.label === "CE" ||
+                    selectedOption.label === "Pasaporte"
+                  ) {
+                    setIsClientNameEditable(true);
+                    setClientName("");
+                    setNumberDocumentClient("");
+                  } else {
+                    setIsClientNameEditable(false);
+                  }
+                }}
+              />
+            </div>
 
             {/* NumberDocumentClient */}
             <div className="mb-4">
@@ -428,7 +432,7 @@ const Home = () => {
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
                 type="text"
-                placeholder="Ingresa el número de ticket - ATERAX"
+                placeholder="Ingresa el nro. de ticket - ATERAX"
                 value={ticketNumber}
                 onChange={(e) => {
                   const value = e.target.value;

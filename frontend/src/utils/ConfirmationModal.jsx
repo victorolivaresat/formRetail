@@ -1,15 +1,19 @@
 import PropTypes from "prop-types";
 
-const ConfirmationModal = ({ show, handleClose, handleConfirm, formData, formDataConfirm }) => {
+const ConfirmationModal = ({
+  show,
+  handleClose,
+  handleConfirm,
+  formData,
+  formDataConfirm,
+}) => {
   return (
     <>
       {show && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white rounded-lg shadow-lg w-full max-w-md">
             <div className="flex justify-between items-center p-4 border-b border-gray-200">
-              <h3 className="text-xl font-semibold">
-                Confirmación de registro
-              </h3>
+              <h3 className="font-semibold">Confirmación de registro</h3>
               <button
                 className="text-gray-400 hover:text-gray-500 focus:outline-none"
                 onClick={handleClose}
@@ -32,36 +36,37 @@ const ConfirmationModal = ({ show, handleClose, handleConfirm, formData, formDat
             </div>
             <div className="p-4">
               <div className="modal-content">
-                <h2 className="my-2">Confirmar Datos Ingresados</h2>
-                <p>
-                  <strong>Tienda:</strong> {formData.storeId}
-                </p>
-                <p>
-                  <strong>Zona:</strong> {formDataConfirm.zonaNombre}
-                </p>
-                <p>
-                  <strong>Supervisor:</strong> {formDataConfirm.supervisorNombre}
-                </p>
-                
-                <br />
-          
-                <p>
-                  <strong>Nombre del Cliente:</strong> {formData.clientName}
-                </p>
-                <p>
-                  <strong>Número de Documento:</strong>{" "}
-                  {formData.numberDocumentClient}
-                </p>
-                <p>
-                  <strong>Número de Ticket:</strong> {formData.ticketNumber}
-                </p>
-                <p>
-                  <strong>Fecha de Cange:</strong> {formData.exchangeDate}
-                </p>
-                <p>
-                  <strong>Promoción:</strong> {formData.promotionId}
-                </p>
+                <div className="mb-4 p-4 bg-slate-200 rounded-lg">
+                  <p>
+                    <strong>Tienda:</strong> {formData.storeId}
+                  </p>
+                  <p>
+                    <strong>Zona:</strong> {formDataConfirm.zonaNombre}
+                  </p>
+                  <p>
+                    <strong>Supervisor:</strong>{" "}
+                    {formDataConfirm.supervisorNombre}
+                  </p>
+                </div>
 
+                <div className="mb-4 p-4 bg-green-200 rounded-lg">
+                  <p>
+                    <strong>Nombre del Cliente:</strong> {formData.clientName}
+                  </p>
+                  <p>
+                    <strong>Número de Documento:</strong>{" "}
+                    {formData.numberDocumentClient}
+                  </p>
+                  <p>
+                    <strong>Número de Ticket:</strong> {formData.ticketNumber}
+                  </p>
+                  <p>
+                    <strong>Fecha de Canje:</strong> {formData.exchangeDate}
+                  </p>
+                  <p>
+                    <strong>Promoción:</strong> {formData.promotionId}
+                  </p>
+                </div>
               </div>
             </div>
 

@@ -62,7 +62,7 @@ const createDataForm = async (req, res) => {
     console.error(error);
 
     // Devolver solo el mensaje de error limpio
-    return res.status(400).json({ error: `Error creating data form: ${error.message}` });
+    return res.status(400).json({ error: `Error : ${error.message}` });
   }
 };
 
