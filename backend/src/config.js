@@ -21,5 +21,6 @@ module.exports = {
   },
   CORS: {
     ORIGIN: "http://localhost:5173",
+    // ORIGIN: "http://192.168.21.35",
   },
 };

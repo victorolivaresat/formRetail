@@ -7,6 +7,7 @@ import "./Routes.css";
 const ProtectedRoute = () => {
   const { isAuthenticated, loadingPage } = useAuth();
   const [loading, setLoading] = useState(true);
+  const urlBasic = import.meta.env.VITE_URL;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -21,7 +22,7 @@ const ProtectedRoute = () => {
       {loadingPage || loading ? (
         <LoaderPage />
       ) : (
-        <>{isAuthenticated ? <Outlet /> : <Navigate to="/login" />}</>
+        <>{isAuthenticated ? <Outlet /> : <Navigate to={`${urlBasic}/login`} />}</>
       )}
     </>
   );

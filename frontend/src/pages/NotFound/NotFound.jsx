@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 
 const NotFound = () => {
   const [loading, setLoading] = useState(true);
+  const urlBasic = import.meta.env.VITE_URL;
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -31,7 +32,7 @@ const NotFound = () => {
             <p className="text-xl mt-2 text-gray-600">
               La página que estás buscando no existe.
             </p>
-            <Link to="/" className="mt-6 inline-block px-8 py-3 bg-slate-600 text-white text-lg font-semibold shadow hover:bg-slate-700 transition">
+            <Link to={urlBasic} className="mt-6 inline-block px-8 py-3 bg-slate-600 text-white text-lg font-semibold shadow hover:bg-slate-700 transition">
               Volver
             </Link>
           </div>

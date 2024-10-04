@@ -5,10 +5,13 @@ import NotFound from "../pages/NotFound/NotFound";
 import ProtectedRoute from "./ProtectedRoute";
 import Login from "../pages/Login/Login";
 
+
+const urlBasic = import.meta.env.VITE_URL;
+
 const AppRoutes = () => (
   <Routes>
     <Route
-      path="/login"
+      path={`${urlBasic}/login`}
       element={
         <RouteTransition>
           <Login />
@@ -17,7 +20,7 @@ const AppRoutes = () => (
     />
     <Route element={<ProtectedRoute />}>
       <Route
-        path="/"
+        path={urlBasic}
         element={
           <RouteTransition>
             <Home />
@@ -34,7 +37,7 @@ const AppRoutes = () => (
         }
       />
     </Route>
-    <Route path="*" element={<Navigate to="/login" />} />
+    <Route path="*" element={<Navigate to={`${urlBasic}/login`} />} />
   </Routes>
 );
 

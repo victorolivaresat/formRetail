@@ -18,7 +18,6 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use("/public", express.static(path.join(__dirname, "../public")));
-// app.use('/attachments', express.static(path.join(__dirname, '../src/assets/attachments')));
 
 app.use((err, req, res, next) => {
   console.error(err.stack);

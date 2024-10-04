@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 
+
 const Login = () => {
   const {
     register,
@@ -12,6 +13,8 @@ const Login = () => {
   const { loginUser } = useAuth();
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+
+  const urlBasic = import.meta.env.VITE_URL;
 
   const onSubmit = async (data) => {
     const { nationalId } = data;
@@ -24,14 +27,14 @@ const Login = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/");
+      navigate(urlBasic);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, urlBasic]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="w-full max-w-md p-8 rounded-lg shadow-lg bg-white">
-        <img src="../src/assets/logo.png" alt="Logo" className="w-32 mx-auto mb-6" />
+        <img src="logo.png" alt="Logo" className="w-20 mx-auto mb-6" />
         <h1 className="text-2xl font-bold text-center mb-6">Comenzar ahora</h1>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
