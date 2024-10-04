@@ -11,7 +11,7 @@ const urlBasic = import.meta.env.VITE_URL;
 const AppRoutes = () => (
   <Routes>
     <Route
-      path={`${urlBasic}/login`}
+      path={urlBasic + "login"}
       element={
         <RouteTransition>
           <Login />
@@ -37,7 +37,7 @@ const AppRoutes = () => (
         }
       />
     </Route>
-    <Route path="*" element={<Navigate to={`${urlBasic}/login`} />} />
+    <Route path="*" element={<Navigate to={urlBasic + "login"} />} />
   </Routes>
 );
 

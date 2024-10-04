@@ -35,7 +35,7 @@ const Home = () => {
   const [errors, setErrors] = useState({});
   const [path, setPath] = useState("");
 
-  
+  const urlBasic = import.meta.env.VITE_URL;
 
   const ticketTypes = [
     { value: 1, label: "Aterax" },
@@ -368,7 +368,7 @@ const Home = () => {
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
         <ToastContainer />
         <img
-          src="../src/assets/logo2.png"
+          src={urlBasic + "logo2.png"}
           alt="Logo"
           className="w-40 mx-auto"
         />
