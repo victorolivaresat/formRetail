@@ -319,6 +319,9 @@ const Home = () => {
       setDocumentTypeId("");
       setTicketTypeId("");
       setPath("");
+
+      setFormData({});
+      setPreviewImage("");
     } catch (error) {
       console.error("Error creating DataForm:", error);
       toast.error(error.response.data.error);
@@ -333,13 +336,11 @@ const Home = () => {
     const file = event.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      setPreviewImage(imageUrl); // Establece la URL de vista previa
+      setPreviewImage(imageUrl); 
 
-      // Aquí puedes seguir con la carga del archivo al servidor si es necesario
       const formData = new FormData();
       formData.append("image", file);
 
-      // Envía el archivo a tu API
       uploadFile(formData)
         .then((response) => {
           if (response.success) {
@@ -539,7 +540,7 @@ const Home = () => {
 
             {/* Upload Image */}
             <div className="mb-4">
-              <input type="file" onChange={uploadImage} />
+              <input type="file" onChange={uploadImage}  placeholder="Sube una imagen"/>
               {previewImage && (
                 <img
                   src={previewImage}
