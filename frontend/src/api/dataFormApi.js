@@ -90,3 +90,13 @@ export const getClientByNumDoc = async (numberDocumentClient, documentTypeId) =>
 };
 
 
+// Upload File
+export const uploadFile = async (formData) => {
+  try {
+    const { data } = await axios.post("upload", formData);
+    return data;
+  } catch (error) {
+    console.error("Error uploading file:", error);
+    throw error;
+  }
+};

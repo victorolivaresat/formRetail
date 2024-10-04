@@ -2,7 +2,7 @@ const authController = require('../app/controllers/authController');
 const routes = require('express').Router();
 
 // Middlewares
-const { validateSchema } = require('../app/middleware/validateSchema');
+const { validateSchema } = require('../app/middlewares/validateSchema');
 const { loginSchema } = require("../app/validators/authSchema");
 
 /**

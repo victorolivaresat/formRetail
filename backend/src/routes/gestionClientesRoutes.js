@@ -9,7 +9,7 @@ const {
   deleteCliente,
   getClienteByNumDoc,
 } = require('../app/controllers/gestionClienteController');
-const authRequired = require("../app/middleware/validateToken");
+const authRequired = require("../app/middlewares/validateToken");
 
 routes.get('/clientes', authRequired, getAllClientes);
 routes.get('/clienteas/:id', authRequired, getClienteById);

@@ -37,6 +37,16 @@ const dataFormSchema = zod.object({
       message: "El ID del tipo de documento debe ser un número entero positivo",
     }),
 
+  
+  ticketTypeId: zod
+    .number({
+      required_error: "El ID del tipo de ticket es obligatorio",
+    })
+    .int()
+    .positive({
+      message: "El ID del tipo de ticket debe ser un número entero positivo",
+    }),
+
   exchangeDate: zod
     .string({
       required_error: "La fecha es obligatoria",
@@ -71,6 +81,7 @@ const dataFormSchema = zod.object({
     .max(10, {
       message: "El número de ticket no puede exceder los 10 caracteres",
     }),
+    
 
   image: zod
     .string()

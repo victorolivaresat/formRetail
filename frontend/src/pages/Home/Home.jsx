@@ -10,6 +10,7 @@ import {
   getClientByNumDoc,
   getAllDocumentTypes,
   getStoreDetails,
+  uploadFile,
 } from "../../api/dataFormApi";
 
 const Home = () => {
@@ -21,7 +22,9 @@ const Home = () => {
   const [isClientNameEditable, setIsClientNameEditable] = useState(false);
   const [numberDocumentClient, setNumberDocumentClient] = useState("");
   const [documentTypeId, setDocumentTypeId] = useState("");
+  const [previewImage, setPreviewImage] = useState("");
   const [documentTypes, setDocumentTypes] = useState([]);
+  const [ticketTypeId, setTicketTypeId] = useState("");
   const [ticketNumber, setTicketNumber] = useState("");
   const [promotionId, setPromotionId] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -31,7 +34,15 @@ const Home = () => {
   const [stores, setStores] = useState([]);
   const [errors, setErrors] = useState({});
   const [path, setPath] = useState("");
-  const [formDataConfirm, setFormDataConfirm] = useState({});
+
+  
+
+  const ticketTypes = [
+    { value: 1, label: "Aterax" },
+    { value: 2, label: "Golden Race" },
+  ];
+
+  const [storeDetailsData, setstoreDetailsData] = useState({});
 
   useEffect(() => {
     if (numberDocumentClient.length < prevNumberDocumentLength) {
@@ -49,7 +60,6 @@ const Home = () => {
     storeId: "",
     promotionId: "",
     documentTypeId: "",
-    path: "",
   });
 
   // Get all stores
@@ -150,9 +160,9 @@ const Home = () => {
         message: "Debe seleccionar un tipo de documento.",
       },
       {
-        field: path,
-        name: "path",
-        message: "Debe seleccionar una ruta.",
+        field: ticketTypeId,
+        name: "ticketTypeId",
+        message: "Debe seleccionar un tipo de ticket.",
       },
     ];
 
@@ -174,19 +184,23 @@ const Home = () => {
     const url = `https://api.apuestatotal.com/v2/dni?dni=${dni}`;
 
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      if (documentTypeId.value === 1) {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-      if (response.ok) {
-        const data = await response.json();
-        return data;
+        if (response.ok) {
+          const data = await response.json();
+          return data;
+        } else {
+          console.error("Error consultando cliente", response.status);
+          return null;
+        }
       } else {
-        console.error("Error consultando cliente", response.status);
-        return null;
+        toast.error("Solo se permite consulta por DNI.");
       }
     } catch (error) {
       console.error("Error en la petición:", error);
@@ -195,8 +209,6 @@ const Home = () => {
   };
 
   const searchClient = async () => {
-    console.log(documentTypeId);
-
     if (!numberDocumentClient || !documentTypeId.value) {
       toast.error("Debe ingresar el número y tipo de documento.");
       return;
@@ -237,7 +249,6 @@ const Home = () => {
         }
       }
       console.error("Error buscando cliente:", error.response.data.message);
-      toast.error("Hubo un error al buscar el cliente.");
     }
   };
 
@@ -251,13 +262,13 @@ const Home = () => {
 
     setShowModal(true);
 
-    const data2 = await getStoreDetails(storeId.value);
-    console.log(data2);
+    const storeDetails = await getStoreDetails(storeId.value);
+    console.log(storeDetails);
 
-    if (data2 && data2.success && data2.data.length > 0) {
-      setFormDataConfirm({
-        supervisorNombre: data2.data[0].supervisorNombre,
-        zonaNombre: data2.data[0].zonaNombre,
+    if (storeDetails && storeDetails.success && storeDetails.data.length > 0) {
+      setstoreDetailsData({
+        supervisorNombre: storeDetails.data[0].supervisorNombre,
+        zonaNombre: storeDetails.data[0].zonaNombre,
       });
     } else {
       toast.error("No se encontraron datos para el storeId");
@@ -270,9 +281,10 @@ const Home = () => {
       exchangeDate,
       storeId: storeId ? storeId.label : "",
       promotionId: promotionId ? promotionId.label : "",
-      path,
       documentTypeId: documentTypeId ? documentTypeId.label : "",
-      ...formDataConfirm,
+      ticketTypeId: ticketTypeId ? ticketTypeId.label : "",
+      path,
+      ...storeDetailsData,
     });
   };
 
@@ -289,23 +301,23 @@ const Home = () => {
         storeId: storeId ? storeId.value : "",
         promotionId: parseInt(promotionId.value, 10),
         ticketNumber,
-        path,
         documentTypeId: parseInt(documentTypeId.value, 10),
+        ticketTypeId: parseInt(ticketTypeId.value, 10),
+        path,
       };
 
       const response = await createDataForm(dataForm);
 
       console.log("DataForm created:", response);
-
       toast.success("Formulario enviado con éxito!");
 
       setClientName("");
       setNumberDocumentClient("");
       setTicketNumber("");
-      setExchangeDate("");
       setStoreId("");
       setPromotionId("");
       setDocumentTypeId("");
+      setTicketTypeId("");
       setPath("");
     } catch (error) {
       console.error("Error creating DataForm:", error);
@@ -317,18 +329,49 @@ const Home = () => {
     setShowModal(false);
   };
 
+  const uploadImage = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const imageUrl = URL.createObjectURL(file);
+      setPreviewImage(imageUrl); // Establece la URL de vista previa
+
+      // Aquí puedes seguir con la carga del archivo al servidor si es necesario
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Envía el archivo a tu API
+      uploadFile(formData)
+        .then((response) => {
+          if (response.success) {
+            toast.success(response.message);
+            setPath(response.filePath);
+          } else {
+            toast.error("Error al subir la imagen");
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+        });
+    }
+  };
+
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 py-8">
+    <div className="flex items-center justify-center min-h-screen bg-gray-200 py-8">
       <ConfirmationModal
         show={showModal}
         handleClose={handleClose}
         handleConfirm={handleConfirm}
         formData={formData}
-        formDataConfirm={formDataConfirm}
+        storeDetails={storeDetailsData}
       />
 
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
         <ToastContainer />
+        <img
+          src="../src/assets/logo2.png"
+          alt="Logo"
+          className="w-40 mx-auto"
+        />
         <h1 className="text-4xl font-bold text-center mb-4 text-slate-800">
           Bienvenido
           {isAuthenticated && currentUser ? `, ${currentUser.userName}` : ""}
@@ -377,15 +420,16 @@ const Home = () => {
                 value={documentTypeId}
                 onChange={(selectedOption) => {
                   setDocumentTypeId(selectedOption);
-                  if (
+                  setClientName("");
+                  setNumberDocumentClient("");
+
+                  if (selectedOption.label === "DNI") {
+                    setIsClientNameEditable(false);
+                  } else if (
                     selectedOption.label === "CE" ||
                     selectedOption.label === "Pasaporte"
                   ) {
                     setIsClientNameEditable(true);
-                    setClientName("");
-                    setNumberDocumentClient("");
-                  } else {
-                    setIsClientNameEditable(false);
                   }
                 }}
               />
@@ -426,13 +470,32 @@ const Home = () => {
               )}
             </div>
 
+            {/* TicketType */}
+            <div className="mb-4">
+              <Select
+                options={ticketTypes}
+                placeholder="Selecciona el tipo de ticket"
+                value={ticketTypeId}
+                onChange={(selectedOption) => {
+                  setTicketTypeId(selectedOption);
+                  if (selectedOption === null) {
+                    setTicketNumber("");
+                    console.log(selectedOption);
+                  }
+                }}
+              />
+              {errors.ticketTypeId && (
+                <p className="text-red-500 text-sm">{errors.ticketTypeId}</p>
+              )}
+            </div>
+
             {/* TicketNumber */}
             <div className="mb-4">
               <input
                 className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                 id="ticketNumber"
                 type="text"
-                placeholder="Ingresa el nro. de ticket - ATERAX"
+                placeholder="Ingresa el número de ticket"
                 value={ticketNumber}
                 onChange={(e) => {
                   const value = e.target.value;
@@ -461,21 +524,6 @@ const Home = () => {
               )}
             </div>
 
-            {/* Path */}
-            <div className="mb-4">
-              <input
-                className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                id="path"
-                type="url"
-                placeholder="URL de la imagen"
-                onChange={(e) => setPath(e.target.value)}
-                value={path}
-              />
-              {errors.path && (
-                <p className="text-red-500 text-sm">{errors.path}</p>
-              )}
-            </div>
-
             {/* PromotionId */}
             <div className="mb-4">
               <Select
@@ -486,6 +534,18 @@ const Home = () => {
               />
               {errors.promotionId && (
                 <p className="text-red-500 text-sm">{errors.promotionId}</p>
+              )}
+            </div>
+
+            {/* Upload Image */}
+            <div className="mb-4">
+              <input type="file" onChange={uploadImage} />
+              {previewImage && (
+                <img
+                  src={previewImage}
+                  alt="Vista previa"
+                  className="mt-4 w-full h-auto"
+                />
               )}
             </div>
           </div>

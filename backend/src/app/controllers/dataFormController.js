@@ -1,70 +1,93 @@
 // controllers/dataFormController.js
-const DataForm = require('../models/DataForm');
+const DataForm = require("../models/DataForm");
 const sequelize = require("../../config/database");
-const { QueryTypes } = require('sequelize');
+const { QueryTypes } = require("sequelize");
 
 // Crear un nuevo DataForm
+
+const createDataForm = async (req, res) => {
+  try {
+    const { numberDocumentClient, documentTypeId, promotionId, ticketNumber } =
+      req.body;
+
+    // Verificar si el número de ticket ya existe
+    const existingTicket = await DataForm.findOne({
+      where: {
+        ticketNumber,
+      },
+    });
+
+    if (existingTicket) {
+      return res
+        .status(400)
+        .json({
+          error: `El número de ticket ${ticketNumber} ya está registrado.`,
+        });
+    }
+
+    // Verificar si el cliente ya tiene la misma promoción
+    const existingDataForm = await DataForm.findOne({
+      where: {
+        numberDocumentClient,
+        documentTypeId,
+        promotionId,
+      },
+    });
+
+    if (existingDataForm) {
+      return res
+        .status(400)
+        .json({
+          error: `El cliente con documento ${numberDocumentClient} ya tiene registrada la promoción con ID ${promotionId}.`,
+        });
+    }
+
+    const dataForm = await DataForm.create(req.body);
+    return res.status(201).json(dataForm);
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ error: `Error al crear el registro: ${error.message}` });
+  }
+};
 
 // const createDataForm = async (req, res) => {
 //   try {
 //     const { numberDocumentClient, documentTypeId, promotionId } = req.body;
 
-//     // Verificar si el cliente ya tiene la misma promoción
-//     const existingDataForm = await DataForm.findOne({
-//       where: {
-//         numberDocumentClient,
-//         documentTypeId,
-//         promotionId
+//     // Llamar al procedimiento almacenado para validar la promoción
+//     const validation = await sequelize.query(
+//       "EXEC [dbo].[sp_validateDataForm] @numberDocumentId = :numberDocumentId, @documentTypeId = :documentTypeId, @promotionId = :promotionId",
+//       {
+//         replacements: {
+//           numberDocumentId: numberDocumentClient,
+//           documentTypeId: documentTypeId,
+//           promotionId: promotionId,
+//         },
+//         type: QueryTypes.RAW,
 //       }
-//     });
+//     );
 
-//     // Si no existe un registro duplicado, crear el nuevo DataForm
+//     // Verificar si el procedimiento almacenado devolvió un error
+//     if (validation && validation.error) {
+//       return res.status(400).json({
+//         error:
+//           validation.error.message ||
+//           "Error al validar la promoción del cliente.",
+//       });
+//     }
+
+//     // Si la validación es exitosa, crear el nuevo DataForm
 //     const dataForm = await DataForm.create(req.body);
 //     res.status(201).json(dataForm);
 //   } catch (error) {
 //     console.error(error);
-//     res.status(500).json({ error: "Error creating data form: " + error });
+
+//     // Devolver solo el mensaje de error limpio
+//     return res.status(500).json({ error: `Error : ${error.message}` });
 //   }
-
 // };
-
-
-const createDataForm = async (req, res) => {
-  try {
-    const { numberDocumentClient, documentTypeId, promotionId } = req.body;
-
-    // Llamar al procedimiento almacenado para validar la promoción
-    const validation = await sequelize.query(
-      "EXEC [dbo].[sp_validateDataForm] @numberDocumentId = :numberDocumentId, @documentTypeId = :documentTypeId, @promotionId = :promotionId",
-      {
-        replacements: {
-          numberDocumentId: numberDocumentClient,
-          documentTypeId: documentTypeId,
-          promotionId: promotionId,
-        },
-        type: QueryTypes.RAW,
-      }
-    );
-
-    // Verificar si el procedimiento almacenado devolvió un error
-    if (validation && validation.error) {
-      return res.status(400).json({
-        error:
-          validation.error.message ||
-          "Error al validar la promoción del cliente.",
-      });
-    }
-
-    // Si la validación es exitosa, crear el nuevo DataForm
-    const dataForm = await DataForm.create(req.body);
-    res.status(201).json(dataForm);
-  } catch (error) {
-    console.error(error);
-
-    // Devolver solo el mensaje de error limpio
-    return res.status(400).json({ error: `Error : ${error.message}` });
-  }
-};
 
 module.exports = {
   createDataForm,

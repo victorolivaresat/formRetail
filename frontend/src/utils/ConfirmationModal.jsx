@@ -5,7 +5,7 @@ const ConfirmationModal = ({
   handleClose,
   handleConfirm,
   formData,
-  formDataConfirm,
+  storeDetails,
 }) => {
   return (
     <>
@@ -41,11 +41,11 @@ const ConfirmationModal = ({
                     <strong>Tienda:</strong> {formData.storeId}
                   </p>
                   <p>
-                    <strong>Zona:</strong> {formDataConfirm.zonaNombre}
+                    <strong>Zona:</strong> {storeDetails.zonaNombre}
                   </p>
                   <p>
                     <strong>Supervisor:</strong>{" "}
-                    {formDataConfirm.supervisorNombre}
+                    {storeDetails.supervisorNombre}
                   </p>
                 </div>
 
@@ -97,7 +97,7 @@ ConfirmationModal.propTypes = {
   handleClose: PropTypes.func.isRequired,
   handleConfirm: PropTypes.func.isRequired,
   formData: PropTypes.object.isRequired,
-  formDataConfirm: PropTypes.object.isRequired,
+  storeDetails: PropTypes.object.isRequired,
 };
 
 export default ConfirmationModal;
