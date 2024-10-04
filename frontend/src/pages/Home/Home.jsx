@@ -369,7 +369,7 @@ const Home = () => {
       <div className="max-w-2xl w-full p-8 bg-white rounded-lg shadow-lg">
         <ToastContainer />
         <img
-          src={urlBasic + "logo2.png"}
+          src="logo2.png"
           alt="Logo"
           className="w-40 mx-auto"
         />
